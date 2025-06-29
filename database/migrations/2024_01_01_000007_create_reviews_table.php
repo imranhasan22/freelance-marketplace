@@ -10,16 +10,24 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
+            // Foreign keys for users (reviewer and reviewee)
             $table->foreignId('reviewer_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('reviewee_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('job_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('service_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('order_id')->nullable()->constrained()->onDelete('cascade');
-            $table->integer('rating')->unsigned(); // 1-5 stars
+            
+            // Foreign keys for job, service, and order (make sure these tables exist)
+            $table->foreignId('job_id')->nullable()->constrained('jobs')->onDelete('cascade');
+            $table->foreignId('service_id')->nullable()->constrained('services')->onDelete('cascade');
+            
+            // Rating and comment
+            $table->tinyInteger('rating')->unsigned(); // 1-5 stars
             $table->text('comment')->nullable();
+            
+            // Review type (job or service)
             $table->enum('type', ['job', 'service']);
+            
             $table->timestamps();
 
+            // Indexes for performance optimization
             $table->index(['reviewee_id', 'rating']);
             $table->index(['type', 'created_at']);
         });
